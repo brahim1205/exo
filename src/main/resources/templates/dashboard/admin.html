@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GestionSchool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --sidebar-bg:     #ffffff;
+            --sidebar-hover:  #fff7ed;
+            --sidebar-border: rgba(234,88,12,0.1);
+            --sidebar-text:   #78350f;
+            --sidebar-active: #ea580c;
+            --sidebar-width:  248px;
+        }
+
+        html, body { height: 100%; overflow: hidden; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f4f1;
+            display: flex;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: var(--sidebar-width);
+            flex-shrink: 0;
+            background: var(--sidebar-bg);
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--sidebar-border);
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: #fed7aa; border-radius: 4px; }
+
+        /* Brand */
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 18px 18px;
+            border-bottom: 1px solid var(--sidebar-border);
+        }
+        .brand-icon {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+        .brand-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1c0e07;
+            letter-spacing: -0.2px;
+        }
+        .brand-tagline {
+            font-size: 10.5px;
+            color: #b07050;
+            margin-top: 1px;
+        }
+
+        /* Nav */
+        .nav {
+            flex: 1;
+            padding: 14px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .nav-section { margin-bottom: 18px; }
+
+        .nav-section-label {
+            font-size: 10.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #c2855a;
+            padding: 4px 8px;
+            margin-bottom: 4px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: 7px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            transition: all 0.12s ease;
+            position: relative;
+        }
+        .nav-link:hover {
+            background: var(--sidebar-hover);
+            color: #1c0e07;
+        }
+        .nav-link.active {
+            background: rgba(234, 88, 12, 0.1);
+            color: #ea580c;
+        }
+        .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 3px;
+            background: var(--sidebar-active);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .nav-icon {
+            width: 18px;
+            text-align: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* Sidebar footer */
+        .sidebar-footer {
+            padding: 14px 12px;
+            border-top: 1px solid var(--sidebar-border);
+        }
+        .sidebar-footer-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 7px;
+        }
+        .footer-avatar {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        .footer-text { line-height: 1.3; }
+        .footer-name {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #1c0e07;
+        }
+        .footer-role {
+            font-size: 11px;
+            color: #b07050;
+        }
+
+        /* ── Workspace ── */
+        .workspace {
+            margin-left: var(--sidebar-width);
+            width: calc(100vw - var(--sidebar-width));
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .workspace iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: #f1f5f9;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; }
+            .sidebar.open { transform: translateX(0); }
+            .workspace { margin-left: 0; width: 100vw; }
+            .mobile-toggle {
+                display: flex;
+                position: fixed;
+                top: 14px;
+                left: 14px;
+                z-index: 200;
+                background: #ffffff;
+                color: #78350f;
+                border: 1px solid #fed7aa;
+                width: 38px;
+                height: 38px;
+                border-radius: 8px;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                font-size: 15px;
+            }
+        }
+        @media (min-width: 901px) {
+            .mobile-toggle { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="brand-icon">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div>
+                <div class="brand-name">GestionSchool</div>
+                <div class="brand-tagline">Plateforme scolaire</div>
+            </div>
+        </div>
+
+        <nav class="nav">
+            <div class="nav-section">
+                <div class="nav-section-label">Principal</div>
+                <a class="nav-link" th:href="@{/admin/dashboard-view}" target="contentFrame" onclick="setActive(this)">
+                    <span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span>
+                    Tableau de bord
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-label">Gestion</div>
+                <a class="nav-link" th:href="@{/etudiants}" target="contentFrame" onclick="setActive(this)">
+                    <span class="nav-icon"><i class="fa-solid fa-user-graduate"></i></span>
+                    Étudiants
+                </a>
+                <a class="nav-link" th:href="@{/inscriptions}" target="contentFrame" onclick="setActive(this)">
+                    <span class="nav-icon"><i class="fa-solid fa-file-signature"></i></span>
+                    Inscriptions
+                </a>
+                <a class="nav-link" th:href="@{/classes}" target="contentFrame" onclick="setActive(this)">
+                    <span class="nav-icon"><i class="fa-solid fa-school"></i></span>
+                    Classes
+                </a>
+                <a class="nav-link" th:href="@{/filieres}" target="contentFrame" onclick="setActive(this)">
+                    <span class="nav-icon"><i class="fa-solid fa-layer-group"></i></span>
+                    Filières
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-label">Configuration</div>
+                <a class="nav-link" th:href="@{/annees}" target="contentFrame" onclick="setActive(this)">
+                    <span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                    Années académiques
+                </a>
+                <a class="nav-link" th:href="@{/tarifs}" target="contentFrame" onclick="setActive(this)">
+                    <span class="nav-icon"><i class="fa-solid fa-coins"></i></span>
+                    Tarifs
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-footer-info">
+                <div class="footer-avatar">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <div class="footer-text">
+                    <div class="footer-name">Administrateur</div>
+                    <div class="footer-role">Accès complet</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="workspace">
+        <iframe name="contentFrame" th:src="@{/admin/dashboard-view}" title="Contenu principal"></iframe>
+    </main>
+
+    <script>
+        // Highlight active nav link
+        function setActive(el) {
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            el.classList.add('active');
+        }
+        // Set dashboard active on load
+        document.querySelector('.nav-link').classList.add('active');
+
+        // Mobile sidebar toggle
+        const toggle = document.getElementById('mobileToggle');
+        const sidebar = document.getElementById('sidebar');
+        toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    </script>
+</body>
+</html>

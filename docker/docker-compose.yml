@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:15
+    container_name: jdbc
+    environment:
+      POSTGRES_DB: jdbc
+      POSTGRES_USER: jdbcUser
+      POSTGRES_PASSWORD: jdbcpassword
+    ports:
+      - '5434:5432'
+    volumes:
+      - jdbc_data:/var/lib/postgresql/data
+    networks:
+      - jdbc-network
+
+volumes:
+  jdbc_data:
+
+networks:
+  jdbc-network:
+    driver: bridge

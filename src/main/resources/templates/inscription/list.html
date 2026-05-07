@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inscriptions — GestionSchool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="page-wrapper">
+
+    <!-- Banner -->
+    <div class="page-banner">
+        <div style="display:flex;align-items:center;">
+            <div class="page-banner-icon"><i class="fa-solid fa-file-signature"></i></div>
+            <div class="page-banner-left">
+                <h1 class="page-title">Inscriptions</h1>
+                <p class="page-subtitle">Gérez les inscriptions des étudiants par année académique</p>
+            </div>
+        </div>
+        <div class="page-header-right">
+            <a class="btn btn-primary" th:href="@{/inscriptions/new}">
+                <i class="fa-solid fa-plus"></i> Nouvelle inscription
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary strip -->
+    <div class="summary-strip">
+        <div class="summary-item">
+            <div class="summary-icon" style="background:var(--success-subtle);color:var(--success);">
+                <i class="fa-solid fa-file-signature"></i>
+            </div>
+            <div>
+                <div class="summary-val" th:text="${#lists.size(inscriptions)}">0</div>
+                <div class="summary-label">Total inscriptions</div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${message}" class="alert alert-success" role="alert">
+        <i class="fa-solid fa-circle-check"></i>
+        <span th:text="${message}">Message de succès</span>
+    </div>
+
+    <div th:if="${not #lists.isEmpty(inscriptions)}">
+        <!-- Toolbar -->
+        <div class="table-toolbar">
+            <div class="toolbar-left">
+                <div class="search-box">
+                    <span class="search-box-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" id="searchInput" placeholder="Rechercher une inscription…">
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <span class="record-badge">
+                    <i class="fa-solid fa-list"></i>
+                    <strong th:text="${#lists.size(inscriptions)}">0</strong> enregistrements
+                </span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Étudiant</th>
+                        <th>Classe</th>
+                        <th>Année académique</th>
+                        <th>Tarif mensuel</th>
+                        <th style="width:120px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="inscription : ${inscriptions}">
+                        <td>
+                            <div class="date-cell">
+                                <div class="date-cell-main" th:text="${#temporals.format(inscription.dateInscription, 'dd/MM/yyyy')}">—</div>
+                                <div class="date-cell-label">inscription</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="info-cell">
+                                <div class="avatar avatar-green"
+                                     th:if="${inscription.etudiant != null}"
+                                     th:text="${#strings.substring(inscription.etudiant.nom,0,1) + #strings.substring(inscription.etudiant.prenom,0,1)}">AB</div>
+                                <div class="info-cell-text">
+                                    <div class="info-cell-primary"
+                                         th:text="${inscription.etudiant != null ? inscription.etudiant.nom + ' ' + inscription.etudiant.prenom : '—'}">Nom Prénom</div>
+                                    <div class="info-cell-secondary"
+                                         th:text="${inscription.etudiant != null ? inscription.etudiant.matricule : ''}">matricule</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span th:if="${inscription.classe != null}" style="font-weight:500;" th:text="${inscription.classe.nom}">Classe</span>
+                            <span th:if="${inscription.classe == null}" class="text-light">—</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-primary"
+                                  th:text="${inscription.anneeAcademique != null ? inscription.anneeAcademique.code : '—'}">2024-25</span>
+                        </td>
+                        <td>
+                            <div th:if="${inscription.tarif != null}">
+                                <div class="amount-primary" th:text="${#numbers.formatInteger(inscription.tarif.mensualite, 0, 'DEFAULT') + ' FCFA'}">—</div>
+                                <div class="amount-currency">+ <span th:text="${#numbers.formatInteger(inscription.tarif.autresFrais, 0, 'DEFAULT')}">0</span> FCFA frais</div>
+                            </div>
+                            <span th:if="${inscription.tarif == null}" class="text-light">—</span>
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a class="btn-action view" title="Voir" th:href="@{/inscriptions/{id}(id=${inscription.id})}">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a class="btn-action edit" title="Modifier" th:href="@{/inscriptions/{id}/edit(id=${inscription.id})}">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <a class="btn-action pdf" title="Télécharger PDF" th:href="@{/inscriptions/{id}/pdf(id=${inscription.id})}" target="_blank">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </a>
+                                <form th:action="@{/inscriptions/{id}/delete(id=${inscription.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn-action delete" title="Supprimer"
+                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette inscription ?')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card" th:if="${#lists.isEmpty(inscriptions)}">
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="fa-solid fa-file-signature"></i></div>
+            <h2 class="empty-state-title">Aucune inscription trouvée</h2>
+            <p class="empty-state-desc">Créez la première inscription pour commencer.</p>
+            <a class="btn btn-primary" th:href="@{/inscriptions/new}">
+                <i class="fa-solid fa-plus"></i> Créer une inscription
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('searchInput')?.addEventListener('input', function () {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('tbody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

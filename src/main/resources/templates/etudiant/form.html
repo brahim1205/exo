@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Étudiant — GestionSchool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="page-wrapper">
+
+    <div class="form-wrapper">
+        <!-- Back link -->
+        <a class="btn btn-ghost btn-sm" th:href="@{/etudiants}" style="margin-bottom:16px;display:inline-flex;">
+            <i class="fa-solid fa-arrow-left"></i> Retour
+        </a>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title" th:text="${etudiant.id == null ? 'Nouvel etudiant' : 'Modifier letudiant'}">Étudiant</h2>
+                    <p class="text-muted text-small" style="margin-top:3px;">Remplissez les informations personnelles</p>
+                </div>
+                <i class="fa-solid fa-user-graduate" style="font-size:20px;color:#94a3b8;"></i>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/etudiants}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="id" th:value="${etudiant.id}">
+
+                    <div class="form-group">
+                        <label class="form-label">Matricule</label>
+                        <div class="field-readonly">
+                            <span class="auto-badge">Auto</span>
+                            <span th:text="${etudiant.matricule != null ? etudiant.matricule : 'Sera généré automatiquement'}">—</span>
+                        </div>
+                        <p class="form-hint">Le matricule est généré automatiquement à la création.</p>
+                    </div>
+
+                    <p class="form-section-title">Informations personnelles</p>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="nom">Nom <span style="color:#ef4444;">*</span></label>
+                            <input type="text" name="nom" class="form-control" id="nom"
+                                   placeholder="Nom de l'etudiant" required th:value="${etudiant.nom}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="prenom">Prenom <span style="color:#ef4444;">*</span></label>
+                            <input type="text" name="prenom" class="form-control" id="prenom"
+                                   placeholder="Prenom de l'etudiant" required th:value="${etudiant.prenom}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="date_naissance">Date de naissance <span style="color:#ef4444;">*</span></label>
+                            <input type="date" name="date_naissance" class="form-control" id="date_naissance" required th:value="${etudiant.date_naissance}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="adresse">Adresse</label>
+                            <input type="text" name="adresse" class="form-control" id="adresse"
+                                   placeholder="Adresse complete" th:value="${etudiant.adresse}">
+                        </div>
+                        <div class="form-group form-grid-full">
+                            <label class="form-label" for="photo">Photo</label>
+                            <input type="file" name="photo" class="form-control" id="photo" accept="image/*">
+                            <p class="form-hint">Importez une photo d'identite pour l'etudiant.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fa-solid fa-floppy-disk"></i> Enregistrer
+                        </button>
+                        <a class="btn btn-outline" th:href="@{/etudiants}">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

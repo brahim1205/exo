@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Classe — GestionSchool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="page-wrapper">
+
+    <div class="form-wrapper">
+        <a class="btn btn-ghost btn-sm" th:href="@{/classes}" style="margin-bottom:16px;display:inline-flex;">
+            <i class="fa-solid fa-arrow-left"></i> Retour
+        </a>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title" th:text="${classe.id == null ? 'Nouvelle classe' : 'Modifier la classe'}">Classe</h2>
+                    <p class="text-muted text-small" style="margin-top:3px;">Remplissez les informations de la classe</p>
+                </div>
+                <i class="fa-solid fa-school" style="font-size:20px;color:#94a3b8;"></i>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/classes}" th:object="${classe}" method="post">
+                    <input type="hidden" th:field="*{id}">
+
+                    <div class="form-group">
+                        <label class="form-label">Code</label>
+                        <div class="field-readonly">
+                            <span class="auto-badge">Auto</span>
+                            <span th:text="${classe.code != null ? classe.code : 'Sera généré automatiquement'}">—</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="nom">Nom de la classe <span style="color:#ef4444;">*</span></label>
+                        <input type="text" th:field="*{nom}" class="form-control" id="nom"
+                               placeholder="Ex : Terminale A, Licence 2 Info" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="filiereId">Filière <span style="color:#ef4444;">*</span></label>
+                        <select th:field="*{filiere.id}" class="form-control" id="filiereId">
+                            <option value="">— Sélectionner une filière —</option>
+                            <option th:each="f : ${filieres}" th:value="${f.id}" th:text="${f.nom}">Filière</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fa-solid fa-floppy-disk"></i> Enregistrer
+                        </button>
+                        <a class="btn btn-outline" th:href="@{/classes}">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

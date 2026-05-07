@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Étudiants — GestionSchool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="page-wrapper">
+
+    <!-- Banner -->
+    <div class="page-banner">
+        <div style="display:flex;align-items:center;">
+            <div class="page-banner-icon"><i class="fa-solid fa-user-graduate"></i></div>
+            <div class="page-banner-left">
+                <h1 class="page-title">Étudiants</h1>
+                <p class="page-subtitle">Gérez la liste des étudiants inscrits à l'établissement</p>
+            </div>
+        </div>
+        <div class="page-header-right">
+            <a class="btn btn-primary" th:href="@{/etudiants/new}">
+                <i class="fa-solid fa-user-plus"></i> Nouvel étudiant
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary strip -->
+    <div class="summary-strip">
+        <div class="summary-item">
+            <div class="summary-icon" style="background:var(--primary-subtle);color:var(--primary);">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div>
+                <div class="summary-val" th:text="${#lists.size(etudiants)}">0</div>
+                <div class="summary-label">Total étudiants</div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${message}" class="alert alert-success" role="alert">
+        <i class="fa-solid fa-circle-check"></i>
+        <span th:text="${message}">Message de succès</span>
+    </div>
+
+    <!-- Table -->
+    <div th:if="${not #lists.isEmpty(etudiants)}">
+        <!-- Toolbar -->
+        <div class="table-toolbar">
+            <div class="toolbar-left">
+                <div class="search-box">
+                    <span class="search-box-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" id="searchInput" placeholder="Rechercher un étudiant…">
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <span class="record-badge">
+                    <i class="fa-solid fa-list"></i>
+                    <strong th:text="${#lists.size(etudiants)}">0</strong> enregistrements
+                </span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Étudiant</th>
+                        <th>Matricule</th>
+                        <th>Date de naissance</th>
+                        <th>Adresse</th>
+                        <th style="width:90px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="etudiant : ${etudiants}">
+                        <td>
+                            <div class="info-cell">
+                                <div class="avatar avatar-orange"
+                                     th:text="${#strings.substring(etudiant.nom,0,1) + #strings.substring(etudiant.prenom,0,1)}">AB</div>
+                                <div class="info-cell-text">
+                                    <div class="info-cell-primary" th:text="${etudiant.nom + ' ' + etudiant.prenom}">Nom Prénom</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="chip chip-blue font-mono" th:text="${etudiant.matricule}">MAT-001</span>
+                        </td>
+                        <td>
+                            <div class="date-cell">
+                                <div class="date-cell-main" th:text="${#temporals.format(etudiant.date_naissance, 'dd/MM/yyyy')}">—</div>
+                                <div class="date-cell-label">naissance</div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-muted" th:text="${etudiant.adresse}">—</span>
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a class="btn-action edit" title="Modifier" th:href="@{/etudiants/{id}/edit(id=${etudiant.id})}">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <form th:action="@{/etudiants/{id}/delete(id=${etudiant.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn-action delete" title="Supprimer"
+                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet étudiant ?')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="card" th:if="${#lists.isEmpty(etudiants)}">
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="fa-solid fa-user-graduate"></i></div>
+            <h2 class="empty-state-title">Aucun étudiant trouvé</h2>
+            <p class="empty-state-desc">Commencez par ajouter un premier étudiant.</p>
+            <a class="btn btn-primary" th:href="@{/etudiants/new}">
+                <i class="fa-solid fa-user-plus"></i> Ajouter un étudiant
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('searchInput')?.addEventListener('input', function () {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('tbody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

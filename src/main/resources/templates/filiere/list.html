@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Filières — GestionSchool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="page-wrapper">
+
+    <!-- Banner -->
+    <div class="page-banner">
+        <div style="display:flex;align-items:center;">
+            <div class="page-banner-icon"><i class="fa-solid fa-layer-group"></i></div>
+            <div class="page-banner-left">
+                <h1 class="page-title">Filières</h1>
+                <p class="page-subtitle">Gérez les parcours et formations proposés</p>
+            </div>
+        </div>
+        <div class="page-header-right">
+            <a class="btn btn-primary" th:href="@{/filieres/new}">
+                <i class="fa-solid fa-plus"></i> Nouvelle filière
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary strip -->
+    <div class="summary-strip">
+        <div class="summary-item">
+            <div class="summary-icon" style="background:var(--purple-subtle);color:var(--purple);">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <div>
+                <div class="summary-val" th:text="${#lists.size(filieres)}">0</div>
+                <div class="summary-label">Filières ouvertes</div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${message}" class="alert alert-success" role="alert">
+        <i class="fa-solid fa-circle-check"></i>
+        <span th:text="${message}">Message</span>
+    </div>
+
+    <div th:if="${not #lists.isEmpty(filieres)}">
+        <!-- Toolbar -->
+        <div class="table-toolbar">
+            <div class="toolbar-left">
+                <div class="search-box">
+                    <span class="search-box-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" id="searchInput" placeholder="Rechercher une filière…">
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <span class="record-badge">
+                    <i class="fa-solid fa-list"></i>
+                    <strong th:text="${#lists.size(filieres)}">0</strong> enregistrements
+                </span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Nom de la filière</th>
+                        <th style="width:90px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="filiere : ${filieres}">
+                        <td>
+                            <span class="chip chip-blue font-mono" th:text="${filiere.code}">CODE</span>
+                        </td>
+                        <td>
+                            <div class="info-cell">
+                                <div class="avatar avatar-purple" style="width:32px;height:32px;font-size:12px;"
+                                     th:text="${#strings.substring(filiere.nom, 0, 1)}">F</div>
+                                <div class="info-cell-primary" th:text="${filiere.nom}">Nom de la filière</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a class="btn-action edit" title="Modifier" th:href="@{/filieres/{id}/edit(id=${filiere.id})}">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <form th:action="@{/filieres/{id}/delete(id=${filiere.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn-action delete" title="Supprimer"
+                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette filière ?')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card" th:if="${#lists.isEmpty(filieres)}">
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="fa-solid fa-layer-group"></i></div>
+            <h2 class="empty-state-title">Aucune filière trouvée</h2>
+            <p class="empty-state-desc">Commencez par créer une première filière de formation.</p>
+            <a class="btn btn-primary" th:href="@{/filieres/new}">
+                <i class="fa-solid fa-plus"></i> Créer une filière
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('searchInput')?.addEventListener('input', function () {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('tbody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Années académiques — GestionSchool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        .dates-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 16px;
+        }
+        .dates-grid .date-entry {
+            display: flex;
+            flex-direction: column;
+        }
+        .dates-grid .date-entry .lbl {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+        .dates-grid .date-entry .val {
+            font-size: 12.5px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body class="page-wrapper">
+
+    <!-- Banner -->
+    <div class="page-banner">
+        <div style="display:flex;align-items:center;">
+            <div class="page-banner-icon"><i class="fa-solid fa-calendar-days"></i></div>
+            <div class="page-banner-left">
+                <h1 class="page-title">Années académiques</h1>
+                <p class="page-subtitle">Gérez le calendrier et les statuts des années</p>
+            </div>
+        </div>
+        <div class="page-header-right">
+            <a class="btn btn-primary" th:href="@{/annees/new}">
+                <i class="fa-solid fa-plus"></i> Nouvelle année
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary strip -->
+    <div class="summary-strip">
+        <div class="summary-item">
+            <div class="summary-icon" style="background:var(--info-subtle);color:var(--info);">
+                <i class="fa-solid fa-calendar-days"></i>
+            </div>
+            <div>
+                <div class="summary-val" th:text="${#lists.size(annees)}">0</div>
+                <div class="summary-label">Années configurées</div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${message}" class="alert alert-success" role="alert">
+        <i class="fa-solid fa-circle-check"></i>
+        <span th:text="${message}">Message</span>
+    </div>
+
+    <div th:if="${not #lists.isEmpty(annees)}">
+        <!-- Toolbar -->
+        <div class="table-toolbar">
+            <div class="toolbar-left">
+                <div class="search-box">
+                    <span class="search-box-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" id="searchInput" placeholder="Rechercher une année…">
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <span class="record-badge">
+                    <i class="fa-solid fa-list"></i>
+                    <strong th:text="${#lists.size(annees)}">0</strong> enregistrements
+                </span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Statut</th>
+                        <th>Dates clés</th>
+                        <th>Inscriptions</th>
+                        <th style="width:160px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="annee : ${annees}">
+                        <td>
+                            <span class="chip chip-blue font-mono" th:text="${annee.code}">CODE</span>
+                        </td>
+                        <td>
+                            <span th:if="${annee.statut != null}"
+                                  th:classappend="${annee.statut.name() == 'BROUILLON' ? 'badge-brouillon' :
+                                                  annee.statut.name() == 'PUBLIEE' ? 'badge-publiee' :
+                                                  annee.statut.name() == 'INSCRIPTIONS_OUVERTES' ? 'badge-inscriptions-ouvertes' :
+                                                  annee.statut.name() == 'INSCRIPTIONS_SUSPENDUES' ? 'badge-inscriptions-suspendues' :
+                                                  annee.statut.name() == 'CLOTUREE' ? 'badge-cloturee' : 'badge-secondary'}"
+                                  class="badge"
+                                  th:text="${annee.statut}">Statut</span>
+                        </td>
+                        <td>
+                            <div class="dates-grid">
+                                <div class="date-entry">
+                                    <span class="lbl">Ouverture</span>
+                                    <span class="val" th:text="${annee.dateOuverture}">—</span>
+                                </div>
+                                <div class="date-entry">
+                                    <span class="lbl">Fermeture</span>
+                                    <span class="val" th:text="${annee.dateFermeture}">—</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="dates-grid">
+                                <div class="date-entry">
+                                    <span class="lbl">Début</span>
+                                    <span class="val" th:text="${annee.dateDebutInscription}">—</span>
+                                </div>
+                                <div class="date-entry">
+                                    <span class="lbl">Fin</span>
+                                    <span class="val" th:text="${annee.dateFinInscription}">—</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <form th:action="@{/annees/{id}/publier(id=${annee.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn-action status" title="Publier"
+                                            th:disabled="${annee.statut != T(com.gestionSchool.model.StatutAnneeAcademique).BROUILLON}">
+                                        <i class="fa-solid fa-upload"></i>
+                                    </button>
+                                </form>
+                                <form th:action="@{/annees/{id}/ouvrir(id=${annee.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn-action view" title="Ouvrir les inscriptions"
+                                            th:disabled="${annee.statut != T(com.gestionSchool.model.StatutAnneeAcademique).PUBLIEE}">
+                                        <i class="fa-solid fa-lock-open"></i>
+                                    </button>
+                                </form>
+                                <form th:action="@{/annees/{id}/suspendre(id=${annee.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn-action edit" title="Suspendre"
+                                            th:disabled="${annee.statut != T(com.gestionSchool.model.StatutAnneeAcademique).INSCRIPTIONS_OUVERTES}">
+                                        <i class="fa-solid fa-pause"></i>
+                                    </button>
+                                </form>
+                                <form th:action="@{/annees/{id}/reouvrir(id=${annee.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn-action view" title="Réouvrir"
+                                            th:disabled="${annee.statut != T(com.gestionSchool.model.StatutAnneeAcademique).INSCRIPTIONS_SUSPENDUES}">
+                                        <i class="fa-solid fa-rotate-right"></i>
+                                    </button>
+                                </form>
+                                <form th:action="@{/annees/{id}/cloturer(id=${annee.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn-action delete" title="Clôturer"
+                                            th:disabled="${annee.statut != T(com.gestionSchool.model.StatutAnneeAcademique).INSCRIPTIONS_OUVERTES
+                                                and annee.statut != T(com.gestionSchool.model.StatutAnneeAcademique).INSCRIPTIONS_SUSPENDUES}">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card" th:if="${#lists.isEmpty(annees)}">
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="fa-solid fa-calendar-days"></i></div>
+            <h2 class="empty-state-title">Aucune année académique</h2>
+            <p class="empty-state-desc">Commencez par configurer une première année académique.</p>
+            <a class="btn btn-primary" th:href="@{/annees/new}">
+                <i class="fa-solid fa-plus"></i> Créer une année
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('searchInput')?.addEventListener('input', function () {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('tbody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tableau de bord — GestionSchool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        /* Dashboard-specific layout */
+        .dash-hero {
+            background: linear-gradient(135deg, #9a3412 0%, #ea580c 50%, #f97316 100%);
+            border-radius: 14px;
+            padding: 28px 32px;
+            color: #fff;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            flex-wrap: wrap;
+            position: relative;
+            overflow: hidden;
+        }
+        .dash-hero::after {
+            content: '';
+            position: absolute;
+            right: -40px;
+            top: -40px;
+            width: 220px;
+            height: 220px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .dash-hero::before {
+            content: '';
+            position: absolute;
+            right: 80px;
+            bottom: -60px;
+            width: 160px;
+            height: 160px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 50%;
+        }
+        .dash-hero-content { position: relative; z-index: 1; }
+        .dash-hero h1 {
+            font-size: 1.625rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+        .dash-hero p {
+            color: rgba(255,255,255,0.75);
+            font-size: 14px;
+            margin: 0;
+        }
+        .dash-hero-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .btn-hero-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            background: #fff;
+            color: #ea580c;
+            border-radius: 7px;
+            font-size: 13.5px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+        .btn-hero-primary:hover { background: #fff7ed; color: #c2410c; }
+        .btn-hero-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 7px;
+            font-size: 13.5px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+        .btn-hero-outline:hover { background: rgba(255,255,255,0.18); color: #fff; }
+
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px) { .stats-grid { grid-template-columns: 1fr; } }
+
+        /* Panels */
+        .panels {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 900px) { .panels { grid-template-columns: 1fr; } }
+
+        .panel {
+            background: #fff;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .panel-title {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .panel-body { padding: 16px 20px; }
+
+        /* Quick actions */
+        .quick-action {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 8px;
+            border: 1px solid #f1f5f9;
+            background: #fafbfc;
+            text-decoration: none;
+            transition: all 0.12s ease;
+            margin-bottom: 8px;
+        }
+        .quick-action:last-child { margin-bottom: 0; }
+        .quick-action:hover {
+            border-color: #fed7aa;
+            background: #fff7ed;
+        }
+        .qa-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .qa-text { flex: 1; min-width: 0; }
+        .qa-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #0f172a;
+        }
+        .qa-sub {
+            font-size: 11.5px;
+            color: #94a3b8;
+            margin-top: 1px;
+        }
+        .qa-arrow {
+            color: #94a3b8;
+            font-size: 12px;
+            transition: transform 0.12s ease;
+        }
+        .quick-action:hover .qa-arrow { transform: translateX(3px); color: #ea580c; }
+
+        /* Chart */
+        .chart-container {
+            position: relative;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chart-legend {
+            margin-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12.5px;
+            color: #475569;
+        }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+        .legend-val {
+            margin-left: auto;
+            font-weight: 600;
+            color: #0f172a;
+        }
+    </style>
+</head>
+<body class="page-wrapper">
+
+    <!-- Hero -->
+    <div class="dash-hero">
+        <div class="dash-hero-content">
+            <h1><i class="fa-solid fa-chart-pie" style="opacity:.8;margin-right:8px;"></i>Tableau de bord</h1>
+            <p>Suivez les effectifs, inscriptions et activités de l'établissement en temps réel.</p>
+
+        </div>
+    </div>
+
+    <!-- KPI Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <i class="fa-solid fa-user-graduate"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value" th:text="${countEtudiants}">0</div>
+                <div class="stat-label">Étudiants</div>
+                <div class="stat-sub">effectif global</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">
+                <i class="fa-solid fa-file-signature"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value" th:text="${countInscriptions}">0</div>
+                <div class="stat-label">Inscriptions</div>
+                <div class="stat-sub">en cours</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange">
+                <i class="fa-solid fa-school"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value" th:text="${countClasses}">0</div>
+                <div class="stat-label">Classes</div>
+                <div class="stat-sub">classes actives</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon cyan">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value" th:text="${countFilieres}">0</div>
+                <div class="stat-label">Filières</div>
+                <div class="stat-sub">parcours ouverts</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon purple">
+                <i class="fa-solid fa-calendar-days"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value" th:text="${countAnnees}">0</div>
+                <div class="stat-label">Années</div>
+                <div class="stat-sub">années configurées</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon red">
+                <i class="fa-solid fa-coins"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value" th:text="${countTarifs}">0</div>
+                <div class="stat-label">Tarifs</div>
+                <div class="stat-sub">tarifs publiés</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panels -->
+    <div class="panels">
+        <!-- Quick actions -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title"><i class="fa-solid fa-bolt" style="color:#f59e0b;margin-right:7px;"></i>Actions rapides</span>
+            </div>
+            <div class="panel-body">
+                <a class="quick-action" th:href="@{/filieres/new}" target="_top">
+                    <div class="qa-icon" style="background:#ede9fe;color:#7c3aed;"><i class="fa-solid fa-layer-group"></i></div>
+                    <div class="qa-text">
+                        <div class="qa-label">Créer une filière</div>
+                        <div class="qa-sub">Ajouter un nouveau parcours de formation</div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right qa-arrow"></i>
+                </a>
+                <a class="quick-action" th:href="@{/classes/new}" target="_top">
+                    <div class="qa-icon" style="background:#fef3c7;color:#d97706;"><i class="fa-solid fa-school"></i></div>
+                    <div class="qa-text">
+                        <div class="qa-label">Créer une classe</div>
+                        <div class="qa-sub">Ouvrir une nouvelle classe dans une filière</div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right qa-arrow"></i>
+                </a>
+                <a class="quick-action" th:href="@{/tarifs/new}" target="_top">
+                    <div class="qa-icon" style="background:#fee2e2;color:#dc2626;"><i class="fa-solid fa-coins"></i></div>
+                    <div class="qa-text">
+                        <div class="qa-label">Définir un tarif</div>
+                        <div class="qa-sub">Configurer la mensualité d'une classe</div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right qa-arrow"></i>
+                </a>
+                <a class="quick-action" th:href="@{/annees/new}" target="_top">
+                    <div class="qa-icon" style="background:#ecfeff;color:#0891b2;"><i class="fa-solid fa-calendar-plus"></i></div>
+                    <div class="qa-text">
+                        <div class="qa-label">Configurer une année</div>
+                        <div class="qa-sub">Créer une nouvelle année académique</div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right qa-arrow"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Chart panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title"><i class="fa-solid fa-chart-donut" style="color:#ea580c;margin-right:7px;"></i>Répartition</span>
+            </div>
+            <div class="panel-body">
+                <div class="chart-container">
+                    <canvas id="distChart"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background:#ea580c;"></span>
+                        Étudiants
+                        <span class="legend-val" th:text="${countEtudiants}">0</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background:#10b981;"></span>
+                        Inscriptions
+                        <span class="legend-val" th:text="${countInscriptions}">0</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background:#f59e0b;"></span>
+                        Classes
+                        <span class="legend-val" th:text="${countClasses}">0</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background:#8b5cf6;"></span>
+                        Filières
+                        <span class="legend-val" th:text="${countFilieres}">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script th:inline="javascript">
+        const etudiants    = /*[[${countEtudiants}]]*/ 0;
+        const inscriptions = /*[[${countInscriptions}]]*/ 0;
+        const classes      = /*[[${countClasses}]]*/ 0;
+        const filieres     = /*[[${countFilieres}]]*/ 0;
+
+        const total = etudiants + inscriptions + classes + filieres;
+        const data  = total === 0 ? [1, 1, 1, 1] : [etudiants, inscriptions, classes, filieres];
+
+        new Chart(document.getElementById('distChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Étudiants', 'Inscriptions', 'Classes', 'Filières'],
+                datasets: [{
+                    data: data,
+                    backgroundColor: ['#ea580c', '#10b981', '#f59e0b', '#8b5cf6'],
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    hoverBorderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                cutout: '68%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ' ' + ctx.label + ': ' + (total === 0 ? 0 : ctx.raw)
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
