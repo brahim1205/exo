@@ -27,17 +27,13 @@ jobs:
     - name: Build with Maven
       run: ./mvnw -B clean install --file pom.xml
 
-    - name: Diagnostic des Secrets
-      run: |
-        if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ]; then echo "❌ USERNAME est VIDE"; else echo "✅ USERNAME est détecté"; fi
-        if [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then echo "❌ TOKEN est VIDE"; else echo "✅ TOKEN est détecté"; fi
-
     - name: Login to Docker Hub
       if: github.event_name != 'pull_request'
       uses: docker/login-action@v3
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        # On essaie de récupérer le pseudo depuis les Secrets OU les Variables
+        username: ${{ secrets.DOCKERHUB_USERNAME || vars.DOCKERHUB_USERNAME || 'brahim1205' }}
+        password: ${{ secrets.DOCKERHUB_TOKEN || vars.DOCKERHUB_TOKEN }}
 
     - name: Build and push Docker image
       if: github.event_name != 'pull_request'
@@ -45,4 +41,5 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/gestionschool:latest
+        # On force ici votre pseudo pour être sûr du tag
+        tags: brahim1205/gestionschool:latest
