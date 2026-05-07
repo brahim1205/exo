@@ -12,3 +12,4 @@
 ## 3. [ ] Tests
 - Créer inscription → PDF
 - Vérif layout mobile/desktop
+# Trigger
